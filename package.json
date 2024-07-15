@@ -4,6 +4,10 @@
   "description": "React hook wrapper for Bindbee's connector link flow",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unifyXX/react-link"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c --bundleConfigAsCjs"
