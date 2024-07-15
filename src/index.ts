@@ -1,0 +1,1 @@
+export { useBindbeeMagiclink } from "./useBindbeeMagiclink";
