@@ -1,7 +1,7 @@
 {
   "name": "@bindbee/react-link",
   "version": "0.0.1",
-  "description": "Link flow to connect the HRIS system",
+  "description": "React hook wrapper for Bindbee's connector link flow",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
