@@ -1,17 +1,46 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { UseBindbeeMagicLinkProps, UseBindbeeMagicLinkResponse } from "./types";
 
 const BINDBEE_BASE_URL = "https://magic-link.bindbee.dev";
+
+let isInitialized = false;
 
 export const useBindbeeMagiclink = ({
   linkToken,
   onSuccess = () => {},
   onClose = () => {},
 }: UseBindbeeMagicLinkProps): UseBindbeeMagicLinkResponse => {
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      if (!isInitialized) {
+        isInitialized = true;
+      } else {
+        console.error(
+          "One instance of useBindbeeMagiclink hook has already been registered. Please ensure only one instance is called."
+        );
+      }
+
+      isMounted.current = true;
+    }
+  }, []);
+
+  const generateUniqueId = useCallback(() => {
+    return "xxxx-xxxx-xxxx-xxxx".replace(/[x]/g, (c) => {
+      const r = Math.floor(Math.random() * 16);
+      return r.toString(16);
+    });
+  }, []);
+
+  const instanceId = useMemo(() => generateUniqueId(), []);
+
   const open = useCallback(() => {
     if (!document.getElementById("magic-link-flow")) {
       const iframe = document.createElement("iframe");
-      iframe.src = `${BINDBEE_BASE_URL}/embed?link_token=${linkToken}`;
+      iframe.src = `${BINDBEE_BASE_URL}/embed?link_token=${linkToken}${
+        !!instanceId ? `&instanceId=${instanceId}` : ""
+      }`;
       iframe.id = "magic-link-flow";
       iframe.style.top = "0";
       iframe.style.position = "fixed";
@@ -24,7 +53,7 @@ export const useBindbeeMagiclink = ({
       document.body.prepend(iframe);
       document.body.style.overflow = "hidden";
     }
-  }, [linkToken]);
+  }, [linkToken, instanceId]);
 
   const closeIframe = () => {
     const currentIframe = document.getElementById("magic-link-flow");
@@ -41,6 +70,8 @@ export const useBindbeeMagiclink = ({
 
       try {
         const eventData = JSON.parse(event.data);
+
+        if (eventData.instanceId !== instanceId) return;
 
         switch (eventData.type) {
           case "CLOSE":
@@ -61,8 +92,9 @@ export const useBindbeeMagiclink = ({
 
     return () => {
       window.removeEventListener("message", handleMessage);
+      isInitialized = false;
     };
-  }, []);
+  }, [onSuccess, closeIframe, instanceId]);
 
   return { open };
 };
