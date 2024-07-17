@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { UseBindbeeMagicLinkProps, UseBindbeeMagicLinkResponse } from "./types";
 
-const BINDBEE_BASE_URL = "https://magic-link.bindbee.dev";
+const BINDBEE_BASE_URL = "https://link.bindbee.dev";
 
 let isInitialized = false;
 
