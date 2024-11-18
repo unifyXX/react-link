@@ -7,6 +7,7 @@ let isInitialized = false;
 
 export const useBindbeeMagiclink = ({
   linkToken,
+  serverUrl = "",
   onSuccess = () => {},
   onClose = () => {},
 }: UseBindbeeMagicLinkProps): UseBindbeeMagicLinkResponse => {
@@ -39,8 +40,8 @@ export const useBindbeeMagiclink = ({
     if (!document.getElementById("magic-link-flow")) {
       const iframe = document.createElement("iframe");
       iframe.src = `${BINDBEE_BASE_URL}/embed?link_token=${linkToken}${
-        !!instanceId ? `&instanceId=${instanceId}` : ""
-      }`;
+        !!serverUrl ? `&server_url=${serverUrl}` : ""
+      }${!!instanceId ? `&instanceId=${instanceId}` : ""}`;
       iframe.id = "magic-link-flow";
       iframe.style.top = "0";
       iframe.style.position = "fixed";
@@ -53,7 +54,7 @@ export const useBindbeeMagiclink = ({
       document.body.prepend(iframe);
       document.body.style.overflow = "hidden";
     }
-  }, [linkToken, instanceId]);
+  }, [linkToken, serverUrl, instanceId]);
 
   const closeIframe = () => {
     const currentIframe = document.getElementById("magic-link-flow");

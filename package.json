@@ -1,6 +1,6 @@
 {
   "name": "@bindbee/react-link",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "React hook wrapper for Bindbee's connector link flow",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

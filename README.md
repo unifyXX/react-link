@@ -39,6 +39,7 @@ const App = () => {
 
   const { open } = useBindbeeMagiclink({
     linkToken: "LINK_TOKEN", // Replace LINK_TOKEN with the token retrieved from previous step,
+    serverUrl: "https://api.bindbee.dev", // (OPTIONAL): use 'https://api-eu.bindbee.dev' for EU Region
     onSuccess: handleOnSuccess,
     onClose: handleOnClose,
   });

@@ -4,6 +4,7 @@ export type UseBindbeeMagicLinkResponse = {
 
 export type UseBindbeeMagicLinkProps = {
   linkToken: string;
+  serverUrl?: string;
   onSuccess?: (temporary_token: string) => void;
   onClose?: () => void;
 };
