@@ -1,6 +1,6 @@
 {
   "name": "@bindbee/react-link",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "React hook wrapper for Bindbee's connector link flow",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -38,7 +38,7 @@
     "typescript": "^5.5.2"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   }
 }
