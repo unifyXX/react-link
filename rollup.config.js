@@ -25,7 +25,7 @@ export default {
       babelHelpers: "bundled",
       exclude: "node_modules/**",
     }),
-    typescript(),
+    typescript({ declaration: false, declarationMap: false, composite: false }),
     terser(),
   ],
 };
