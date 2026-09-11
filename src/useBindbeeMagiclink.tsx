@@ -39,6 +39,10 @@ export const useBindbeeMagiclink = ({
   const open = useCallback(() => {
     if (!document.getElementById("magic-link-flow")) {
       const iframe = document.createElement("iframe");
+      // The flow is cross-origin to the host app, so its copy buttons can only
+      // use the Clipboard API if we delegate the permission. It is fixed at
+      // navigation time, so it must be set before the iframe is inserted.
+      iframe.allow = "clipboard-write";
       iframe.src = `${BINDBEE_BASE_URL}/embed?link_token=${linkToken}${
         !!serverUrl ? `&server_url=${serverUrl}` : ""
       }${!!instanceId ? `&instanceId=${instanceId}` : ""}`;
