@@ -1,12 +1,34 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { UseBindbeeMagicLinkProps, UseBindbeeMagicLinkResponse } from "./types";
 
-const BINDBEE_BASE_URL = "https://link.bindbee.dev";
+const BINDBEE_LINK_URL = "https://link.bindbee.dev";
+
+// Only https is accepted, except plain http on localhost for local development.
+const parseLinkUrl = (linkUrl: string) => {
+  try {
+    const url = new URL(linkUrl);
+    const isLocalhost =
+      url.hostname === "localhost" || url.hostname === "127.0.0.1";
+
+    if (url.protocol !== "https:" && !(url.protocol === "http:" && isLocalhost)) {
+      return null;
+    }
+
+    return {
+      origin: url.origin,
+      // Keep any sub-path so the link app can be hosted under e.g. /bindbee-link
+      embedUrl: `${url.origin}${url.pathname.replace(/\/+$/, "")}/embed`,
+    };
+  } catch (e) {
+    return null;
+  }
+};
 
 let isInitialized = false;
 
 export const useBindbeeMagiclink = ({
   linkToken,
+  linkUrl = BINDBEE_LINK_URL,
   serverUrl = "",
   onSuccess = () => {},
   onClose = () => {},
@@ -36,16 +58,26 @@ export const useBindbeeMagiclink = ({
 
   const instanceId = useMemo(() => generateUniqueId(), []);
 
+  const link = useMemo(() => parseLinkUrl(linkUrl), [linkUrl]);
+
   const open = useCallback(() => {
+    if (!link) {
+      console.error(
+        `Invalid linkUrl "${linkUrl}". It must be an absolute https URL (http is only allowed for localhost).`
+      );
+      return;
+    }
+
     if (!document.getElementById("magic-link-flow")) {
       const iframe = document.createElement("iframe");
       // The flow is cross-origin to the host app, so its copy buttons can only
       // use the Clipboard API if we delegate the permission. It is fixed at
       // navigation time, so it must be set before the iframe is inserted.
       iframe.allow = "clipboard-write";
-      iframe.src = `${BINDBEE_BASE_URL}/embed?link_token=${linkToken}${
-        !!serverUrl ? `&server_url=${serverUrl}` : ""
-      }${!!instanceId ? `&instanceId=${instanceId}` : ""}`;
+      const params = new URLSearchParams({ link_token: linkToken });
+      if (serverUrl) params.set("server_url", serverUrl);
+      if (instanceId) params.set("instanceId", instanceId);
+      iframe.src = `${link.embedUrl}?${params.toString()}`;
       iframe.id = "magic-link-flow";
       iframe.style.top = "0";
       iframe.style.position = "fixed";
@@ -58,7 +90,7 @@ export const useBindbeeMagiclink = ({
       document.body.prepend(iframe);
       document.body.style.overflow = "hidden";
     }
-  }, [linkToken, serverUrl, instanceId]);
+  }, [link, linkUrl, linkToken, serverUrl, instanceId]);
 
   const closeIframe = () => {
     const currentIframe = document.getElementById("magic-link-flow");
@@ -71,7 +103,8 @@ export const useBindbeeMagiclink = ({
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== BINDBEE_BASE_URL) return;
+      // Only trust messages from the origin we loaded the iframe from.
+      if (!link || event.origin !== link.origin) return;
 
       try {
         const eventData = JSON.parse(event.data);
@@ -99,7 +132,7 @@ export const useBindbeeMagiclink = ({
       window.removeEventListener("message", handleMessage);
       isInitialized = false;
     };
-  }, [onSuccess, closeIframe, instanceId]);
+  }, [link, onSuccess, closeIframe, instanceId]);
 
   return { open };
 };
