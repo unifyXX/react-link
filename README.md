@@ -49,3 +49,23 @@ const App = () => {
 
 export default App;
 ```
+
+## Self-hosted deployments
+
+If you run the Bindbee link app and API on your own infrastructure, point the hook at them with `linkUrl` and `serverUrl`:
+
+```jsx
+const { open } = useBindbeeMagiclink({
+  linkToken: "LINK_TOKEN",
+  linkUrl: "https://link.your-domain.com", // Base URL of your self-hosted link app (defaults to https://link.bindbee.dev)
+  serverUrl: "https://api.your-domain.com", // Base URL of your self-hosted API
+  onSuccess: handleOnSuccess,
+  onClose: handleOnClose,
+});
+```
+
+- `linkUrl` must be an absolute `https` URL. Plain `http` is accepted only for `localhost`, for local development.
+- The link app may live under a sub-path (e.g. `https://your-domain.com/bindbee-link`); the hook loads `<linkUrl>/embed`.
+- Events from the flow are only accepted from the origin of `linkUrl`.
+- The link app must be embeddable by your application: make sure no `X-Frame-Options` or `Content-Security-Policy: frame-ancestors` header in front of it (e.g. at your reverse proxy) blocks your app's origin.
+- Your API must allow CORS requests from the link app's origin.
